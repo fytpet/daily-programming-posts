@@ -75,15 +75,13 @@ def save_posts_to_firestore(db, collection_ref, new_active_posts, today):
 
 def save_json_to_storage(new_active_posts, utc_now, today):
     posts_json = json.dumps({
-        'data': {
-            post.name(): post.to_dto(today) for post in new_active_posts
-        },
+        'data': [post.to_dto(today) for post in new_active_posts],
         'date': today,
         'created_at': utc_now.isoformat()
     })
     storage_client = storage.Client()
     bucket = storage_client.get_bucket(BUCKET_NAME)
-    filename = f'{today}-posts.json'
+    filename = f'data/{today}-posts.json'
     blob = bucket.blob(filename)
     blob.upload_from_string(posts_json)
     print(f'File {filename} uploaded to {BUCKET_NAME}.')
