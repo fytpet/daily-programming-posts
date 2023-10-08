@@ -1,11 +1,14 @@
 import datetime
+import json
 import os
 import requests
-from google.cloud import firestore
+from google.cloud import firestore, storage
 
 ACTIVE_COMMENT_THRESHOLD = 5
 REQUEST_URL = 'https://www.reddit.com/r/programming/new.json?limit=100&show=all'
 USER_AGENT = 'DailyProgrammingPosts/1.0 by fytpet (Contact: fytpet@gmail.com)'
+
+BUCKET_NAME = 'daily-posts-bucket'
 
 TASK_INDEX = os.getenv('CLOUD_RUN_TASK_INDEX', 0)
 TASK_ATTEMPT = os.getenv('CLOUD_RUN_TASK_ATTEMPT', 0)
@@ -42,14 +45,48 @@ class Post:
     def permalink(self):
         return f'https://www.reddit.com{self.data["permalink"]}'
 
-    def __str__(self):
-        return f'{self.title()}\n{self.url()}\n{self.permalink()}\n{self.num_comments()} comments'
+    def to_dto(self, today):
+        return {
+            'created': self.created_utc().isoformat(),
+            'name': self.name(),
+            'num_comments': self.num_comments(),
+            'permalink': self.permalink(),
+            'score': self.score(),
+            'subreddit': self.subreddit(),
+            'title': self.title(),
+            'url': self.url(),
+            'day': today,
+        }
 
 
 def get_documents_existence_map(db, collection_ref, active_posts):
     document_refs = [collection_ref.document(post.name()) for post in active_posts]
     documents = db.get_all(document_refs)
     return {document.id: document.exists for document in documents}
+
+
+def save_posts_to_firestore(db, collection_ref, new_active_posts, today):
+    batch = db.batch()
+    for post in new_active_posts:
+        doc_ref = collection_ref.document(post.name())
+        batch.set(doc_ref, post.to_dto(today))
+    batch.commit()
+
+
+def save_json_to_storage(new_active_posts, utc_now, today):
+    posts_json = json.dumps({
+        'data': {
+            post.name(): post.to_dto(today) for post in new_active_posts
+        },
+        'date': today,
+        'created_at': utc_now.isoformat()
+    })
+    storage_client = storage.Client()
+    bucket = storage_client.get_bucket(BUCKET_NAME)
+    filename = f'{today}-posts.json'
+    blob = bucket.blob(filename)
+    blob.upload_from_string(posts_json)
+    print(f'File {filename} uploaded to {BUCKET_NAME}.')
 
 
 def main():
@@ -72,24 +109,11 @@ def main():
     new_active_posts = [post for post in active_posts if not documents_existence_map[post.name()]]
     print(len(new_active_posts), 'new active posts')
 
-    today = datetime.datetime.utcnow().date()
+    utc_now = datetime.datetime.utcnow()
+    today = utc_now.date().isoformat()
 
-    batch = db.batch()
-    for post in new_active_posts:
-        print(f'\n{post}')
-        doc_ref = collection_ref.document(post.name())
-        batch.set(doc_ref, {
-            'created': post.created_utc(),
-            'name': post.name(),
-            'num_comments': post.num_comments(),
-            'permalink': post.permalink(),
-            'score': post.score(),
-            'subreddit': post.subreddit(),
-            'title': post.title(),
-            'url': post.url(),
-            'day': today.isoformat()
-        })
-    batch.commit()
+    save_posts_to_firestore(db, collection_ref, new_active_posts, today)
+    save_json_to_storage(new_active_posts, utc_now, today)
 
     print(f"Completed Task #{TASK_INDEX}.")
 
