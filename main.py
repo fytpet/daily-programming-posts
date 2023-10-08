@@ -56,43 +56,42 @@ def main():
     print(f"Starting Task #{TASK_INDEX}, Attempt #{TASK_ATTEMPT}...")
 
     response = requests.get(REQUEST_URL, headers={"User-agent": USER_AGENT})
-    if response.status_code == 200:
-        posts = [Post(child['data']) for child in response.json()['data']['children']]
-        print(len(posts), 'posts fetched')
-
-        active_posts = [post for post in posts if post.is_active()]
-        print(len(active_posts), 'active posts')
-
-        db = firestore.Client()
-        collection_ref = db.collection('posts')
-        documents_existence_map = get_documents_existence_map(db, collection_ref, active_posts)
-
-        new_active_posts = [post for post in active_posts if not documents_existence_map[post.name()]]
-        print(len(new_active_posts), 'new active posts')
-
-        today = datetime.datetime.utcnow().date()
-
-        batch = db.batch()
-        for post in new_active_posts:
-            print(f'\n{post}')
-            doc_ref = collection_ref.document(post.name())
-            batch.set(doc_ref, {
-                'created': post.created_utc(),
-                'name': post.name(),
-                'num_comments': post.num_comments(),
-                'permalink': post.permalink(),
-                'score': post.score(),
-                'subreddit': post.subreddit(),
-                'title': post.title(),
-                'url': post.url(),
-                'day': today.isoformat()
-            })
-        batch.commit()
-
-        print(f"Completed Task #{TASK_INDEX}.")
-
-    else:
+    if not response.status_code == 200:
         exit(response.status_code)
+
+    posts = [Post(child['data']) for child in response.json()['data']['children']]
+    print(len(posts), 'posts fetched')
+
+    active_posts = [post for post in posts if post.is_active()]
+    print(len(active_posts), 'active posts')
+
+    db = firestore.Client()
+    collection_ref = db.collection('posts')
+    documents_existence_map = get_documents_existence_map(db, collection_ref, active_posts)
+
+    new_active_posts = [post for post in active_posts if not documents_existence_map[post.name()]]
+    print(len(new_active_posts), 'new active posts')
+
+    today = datetime.datetime.utcnow().date()
+
+    batch = db.batch()
+    for post in new_active_posts:
+        print(f'\n{post}')
+        doc_ref = collection_ref.document(post.name())
+        batch.set(doc_ref, {
+            'created': post.created_utc(),
+            'name': post.name(),
+            'num_comments': post.num_comments(),
+            'permalink': post.permalink(),
+            'score': post.score(),
+            'subreddit': post.subreddit(),
+            'title': post.title(),
+            'url': post.url(),
+            'day': today.isoformat()
+        })
+    batch.commit()
+
+    print(f"Completed Task #{TASK_INDEX}.")
 
 
 if __name__ == '__main__':
