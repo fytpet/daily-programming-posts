@@ -26,12 +26,23 @@ function createLinkElement(href, textContent) {
   return link;
 }
 
+function displayErrorMessage() {
+  const errorMessage = document.createElement('p');
+  errorMessage.textContent = 'Something went wrong, please come back later while we sort this out.'
+  document.getElementById('post-list').appendChild(errorMessage);
+}
+
+async function fetchPosts(selectedDate) {
+  const jsonUrl = `https://storage.googleapis.com/daily-posts-bucket/data/${selectedDate}-posts.json`;
+  const response = await fetch(jsonUrl);
+  const data = await response.json();
+  return data.data;
+}
+
 async function displayPosts(selectedDate) {
   try {
-    const jsonUrl = `https://storage.googleapis.com/daily-posts-bucket/data/${selectedDate}-posts.json`;
-    const response = await fetch(jsonUrl);
-    const data = await response.json();
-    for (const post of data.data) {
+    const posts = await fetchPosts(selectedDate);
+    for (const post of posts) {
       const postContainer = document.createElement('div');
       postContainer.className = 'post-container';
       postContainer.role = 'listitem';
@@ -45,9 +56,7 @@ async function displayPosts(selectedDate) {
     title.textContent = `${title.textContent} - ${selectedDate}`;
 
   } catch (error) {
-    const errorMessage = document.createElement('p');
-    errorMessage.textContent = 'Something went wrong, please come back later while we sort this out.'
-    document.getElementById('post-list').appendChild(errorMessage);
+    displayErrorMessage();
   }
 }
 
