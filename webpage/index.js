@@ -1,19 +1,17 @@
-const MIN_DATE = "2023-10-08";
+const MIN_DATE = '2023-10-08';
 const ELEVEN_HOURS = 11 * 60 * 60 * 1000;
 
-function getActiveDay() {
-  const activeDate = new Date(Date.now() - ELEVEN_HOURS);
-
-  const year = activeDate.getUTCFullYear();
-  const month = String(activeDate.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(activeDate.getUTCDate()).padStart(2, '0');
-
+function getCurrentDate() {
+  const currentDate = new Date(Date.now() - ELEVEN_HOURS);
+  const year = currentDate.getUTCFullYear();
+  const month = String(currentDate.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(currentDate.getUTCDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
 
-function getSelectedDay(defaultDay) {
+function getSelectedDate(currentDate) {
   const urlSearchParams = new URLSearchParams(window.location.search);
-  return urlSearchParams.get('date') ?? defaultDay;
+  return urlSearchParams.get('date') ?? currentDate;
 }
 
 function onSelectedDateChanged(e) {
@@ -28,8 +26,9 @@ function createLinkElement(href, textContent) {
   return link;
 }
 
-async function displayPosts() {
+async function displayPosts(selectedDate) {
   try {
+    const jsonUrl = `https://storage.googleapis.com/daily-posts-bucket/data/${selectedDate}-posts.json`;
     const response = await fetch(jsonUrl);
     const data = await response.json();
     for (const post of data.data) {
@@ -52,15 +51,20 @@ async function displayPosts() {
   }
 }
 
-const activeDay = getActiveDay();
-const selectedDate = getSelectedDay(activeDay);
+function initializeDateInput(currentDate, selectedDate) {
+  const dateInput = document.getElementById('date-input');
+  dateInput.max = currentDate;
+  dateInput.min = MIN_DATE;
+  dateInput.value = selectedDate;
+  dateInput.addEventListener('change', onSelectedDateChanged);
+}
 
-const jsonUrl = `https://storage.googleapis.com/daily-posts-bucket/data/${selectedDate}-posts.json`;
+function main() {
+  const currentDate = getCurrentDate();
+  const selectedDate = getSelectedDate(currentDate);
 
-const dateInput = document.getElementById('date-input');
-dateInput.max = activeDay;
-dateInput.min = MIN_DATE;
-dateInput.value = selectedDate;
-dateInput.addEventListener('change', onSelectedDateChanged);
+  initializeDateInput(currentDate, selectedDate);
+  displayPosts(selectedDate).then();
+}
 
-displayPosts().then();
+main();
