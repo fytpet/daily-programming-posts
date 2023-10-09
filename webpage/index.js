@@ -44,18 +44,23 @@ function displaySelectedDateInTitle(selectedDate) {
   title.textContent = `${title.textContent} - ${selectedDate}`;
 }
 
+function displayPost(postList, post) {
+  const postContainer = document.createElement('div');
+  postContainer.className = 'post-container';
+  postContainer.role = 'listitem';
+
+  postContainer.appendChild(createLinkElement(post['url'], post['title']));
+  postContainer.appendChild(createLinkElement(post['permalink'], ` [${post['num_comments']} comments]`));
+
+  postList.appendChild(postContainer);
+}
+
 async function displayPosts(selectedDate) {
   try {
     const posts = await fetchPosts(selectedDate);
+    const postList = document.getElementById('post-list')
     for (const post of posts) {
-      const postContainer = document.createElement('div');
-      postContainer.className = 'post-container';
-      postContainer.role = 'listitem';
-
-      postContainer.appendChild(createLinkElement(post['url'], post['title']));
-      postContainer.appendChild(createLinkElement(post['permalink'], ` [${post['num_comments']} comments]`));
-
-      document.getElementById('post-list').appendChild(postContainer);
+      displayPost(postList, post);
     }
     displaySelectedDateInTitle(selectedDate);
   } catch (error) {
