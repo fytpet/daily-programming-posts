@@ -12,6 +12,6 @@ a {
   align-items: start;
 
   &:not(:last-child) {
-    margin-bottom: 20px;
+    margin-bottom: 30px;
   }
 }

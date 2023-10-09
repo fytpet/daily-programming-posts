@@ -19,7 +19,10 @@ class Post:
         self.data = data
 
     def created_utc(self):
-        return datetime.datetime.fromtimestamp(self.data['created_utc'], tz=datetime.timezone.utc)
+        return datetime.datetime.fromtimestamp(
+            self.data['created_utc'],
+            tz=datetime.timezone.utc,
+        )
 
     def is_active(self):
         return self.num_comments() >= ACTIVE_COMMENT_THRESHOLD
@@ -87,7 +90,7 @@ def save_json_to_storage(new_active_posts, utc_now, today):
     print(f'File {filename} uploaded to {BUCKET_NAME}.')
 
 
-def main():
+def main(*_):
     print(f"Starting Task #{TASK_INDEX}, Attempt #{TASK_ATTEMPT}...")
 
     response = requests.get(REQUEST_URL, headers={"User-agent": USER_AGENT})
@@ -104,7 +107,10 @@ def main():
     collection_ref = db.collection('posts')
     documents_existence_map = get_documents_existence_map(db, collection_ref, active_posts)
 
-    new_active_posts = [post for post in active_posts if not documents_existence_map[post.name()]]
+    new_active_posts = [
+        post for post in active_posts
+        if not documents_existence_map[post.name()]
+    ]
     print(len(new_active_posts), 'new active posts')
 
     utc_now = datetime.datetime.utcnow()
@@ -114,7 +120,3 @@ def main():
     save_json_to_storage(new_active_posts, utc_now, today)
 
     print(f"Completed Task #{TASK_INDEX}.")
-
-
-if __name__ == '__main__':
-    main()
