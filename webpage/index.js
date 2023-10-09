@@ -39,6 +39,11 @@ async function fetchPosts(selectedDate) {
   return data.data;
 }
 
+function displaySelectedDateInTitle(selectedDate) {
+  const title = document.getElementById('title');
+  title.textContent = `${title.textContent} - ${selectedDate}`;
+}
+
 async function displayPosts(selectedDate) {
   try {
     const posts = await fetchPosts(selectedDate);
@@ -52,9 +57,7 @@ async function displayPosts(selectedDate) {
 
       document.getElementById('post-list').appendChild(postContainer);
     }
-    const title = document.getElementById('title');
-    title.textContent = `${title.textContent} - ${selectedDate}`;
-
+    displaySelectedDateInTitle(selectedDate);
   } catch (error) {
     displayErrorMessage();
   }
