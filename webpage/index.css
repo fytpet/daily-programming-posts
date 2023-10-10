@@ -6,6 +6,10 @@ a {
   text-decoration: none;
 }
 
+.date-input-container {
+  margin-bottom: 30px;
+}
+
 .post-container {
   display: flex;
   flex-direction: column;

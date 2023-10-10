@@ -28,8 +28,8 @@ function createLinkElement(href, textContent) {
 
 function displayErrorMessage() {
   const errorMessage = document.createElement('p');
-  errorMessage.textContent = 'Something went wrong, please come back later while we sort this out.'
-  document.getElementById('post-list').appendChild(errorMessage);
+  errorMessage.textContent = 'Something went wrong, please come back later while we sort this out.';
+  document.getElementsByTagName('body')[0].appendChild(errorMessage);
 }
 
 async function fetchPosts(selectedDate) {
@@ -48,10 +48,8 @@ function displayPost(postList, post) {
   const postContainer = document.createElement('div');
   postContainer.className = 'post-container';
   postContainer.role = 'listitem';
-
   postContainer.appendChild(createLinkElement(post['url'], post['title']));
   postContainer.appendChild(createLinkElement(post['permalink'], ` [${post['num_comments']} comments]`));
-
   postList.appendChild(postContainer);
 }
 
