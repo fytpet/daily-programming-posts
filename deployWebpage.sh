@@ -1,3 +1,3 @@
 #!/bin/bash
 
-gsutil cp webpage/index.* gs://daily-posts-bucket
+gsutil cp webpage/index.* gs://dailyprogramming.fytilis.com

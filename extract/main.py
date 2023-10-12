@@ -8,7 +8,7 @@ ACTIVE_COMMENT_THRESHOLD = 5
 REQUEST_URL = 'https://www.reddit.com/r/programming/new.json?limit=100&show=all'
 USER_AGENT = 'DailyProgrammingPosts/1.0 by fytpet (Contact: fytpet@gmail.com)'
 
-BUCKET_NAME = 'daily-posts-bucket'
+BUCKET_NAME = 'dailyprogramming.fytilis.com'
 
 TASK_INDEX = os.getenv('CLOUD_RUN_TASK_INDEX', 0)
 TASK_ATTEMPT = os.getenv('CLOUD_RUN_TASK_ATTEMPT', 0)

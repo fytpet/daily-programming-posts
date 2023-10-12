@@ -11,7 +11,7 @@ function getCurrentDate() {
 
 function getSelectedDate(currentDate) {
   const urlSearchParams = new URLSearchParams(window.location.search);
-  return urlSearchParams.get('date') ?? currentDate;
+  return urlSearchParams.get('date') || currentDate;
 }
 
 function onSelectedDateChanged(e) {
@@ -33,7 +33,7 @@ function displayErrorMessage() {
 }
 
 async function fetchPosts(selectedDate) {
-  const jsonUrl = `https://storage.googleapis.com/daily-posts-bucket/data/${selectedDate}-posts.json`;
+  const jsonUrl = `./data/${selectedDate}-posts.json`;
   const response = await fetch(jsonUrl);
   const data = await response.json();
   return data.data;
