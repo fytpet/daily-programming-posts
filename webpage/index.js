@@ -41,7 +41,8 @@ async function fetchPosts(selectedDate) {
 
 function displaySelectedDateInTitle(selectedDate) {
   const title = document.getElementById('title');
-  title.textContent = `${title.textContent} - ${selectedDate}`;
+  const selectedDateNonBreaking = selectedDate.replaceAll('-', '‑');
+  title.textContent = `${title.textContent} - ${selectedDateNonBreaking}`;
 }
 
 function displayPost(postList, post) {
