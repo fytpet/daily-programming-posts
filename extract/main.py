@@ -100,23 +100,23 @@ def main(*_):
     posts = [Post(child['data']) for child in response.json()['data']['children']]
     print(len(posts), 'posts fetched')
 
-    active_posts = [post for post in posts if post.is_active()]
-    print(len(active_posts), 'active posts')
+    active_upvoted_posts = [post for post in posts if post.is_active() and post.score() > 0]
+    print(len(active_upvoted_posts), 'active upvoted posts')
 
     db = firestore.Client()
     collection_ref = db.collection('posts')
-    documents_existence_map = get_documents_existence_map(db, collection_ref, active_posts)
+    documents_existence_map = get_documents_existence_map(db, collection_ref, active_upvoted_posts)
 
-    new_active_posts = [
-        post for post in active_posts
+    new_active_upvoted_posts = [
+        post for post in active_upvoted_posts
         if not documents_existence_map[post.name()]
     ]
-    print(len(new_active_posts), 'new active posts')
+    print(len(new_active_upvoted_posts), 'new active upvoted posts')
 
     utc_now = datetime.datetime.utcnow()
     today = utc_now.date().isoformat()
 
-    save_posts_to_firestore(db, collection_ref, new_active_posts, today)
-    save_json_to_storage(new_active_posts, utc_now, today)
+    save_posts_to_firestore(db, collection_ref, new_active_upvoted_posts, today)
+    save_json_to_storage(new_active_upvoted_posts, utc_now, today)
 
     print(f"Completed Task #{TASK_INDEX}.")
