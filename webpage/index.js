@@ -14,8 +14,12 @@ function getSelectedDate(currentDate) {
   return urlSearchParams.get('date') || currentDate;
 }
 
-function onSelectedDateChanged(e) {
-  window.location.href = `${window.location.pathname}?date=${e.target.value}`;
+function onSelectedDateChanged(e, currentDate) {
+  if (currentDate === e.target.value) {
+    window.location.href = window.location.pathname;
+  } else {
+    window.location.href = `${window.location.pathname}?date=${e.target.value}`;
+  }
 }
 
 function createLinkElement(href, textContent) {
@@ -72,7 +76,7 @@ function initializeDateInput(currentDate, selectedDate) {
   dateInput.max = currentDate;
   dateInput.min = MIN_DATE;
   dateInput.value = selectedDate;
-  dateInput.addEventListener('change', onSelectedDateChanged);
+  dateInput.addEventListener('change', (e) => onSelectedDateChanged(e, currentDate));
 }
 
 function main() {
