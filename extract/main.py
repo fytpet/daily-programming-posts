@@ -2,11 +2,12 @@ import datetime
 import json
 import os
 import requests
+import requests.auth
 from google.cloud import firestore, storage
 
 ACTIVE_COMMENT_THRESHOLD = 5
-REQUEST_URL = 'https://www.reddit.com/r/programming/new.json?limit=100&show=all'
-USER_AGENT = 'DailyProgrammingPosts/1.0 by fytpet (Contact: fytpet@gmail.com)'
+REQUEST_URL = 'https://oauth.reddit.com/r/programming/new?limit=100&show=all'
+USER_AGENT = 'dailyprogramming/0.1 by fytpet'
 
 BUCKET_NAME = 'dailyprogramming.fytilis.com'
 
@@ -28,7 +29,7 @@ class Post:
         return self.num_comments() >= ACTIVE_COMMENT_THRESHOLD
 
     def num_comments(self):
-        return self.data["num_comments"]
+        return self.data['num_comments']
 
     def score(self):
         return self.data['score']
@@ -62,6 +63,14 @@ class Post:
         }
 
 
+def fetch_access_token():
+    client_auth = requests.auth.HTTPBasicAuth(os.getenv('reddit_client_id'), os.getenv('reddit_client_secret'))
+    post_data = {'grant_type': 'password', 'username': os.getenv('reddit_username'), 'password': os.getenv('reddit_password')}
+    headers = {'User-Agent': USER_AGENT}
+    response = requests.post('https://www.reddit.com/api/v1/access_token', auth=client_auth, data=post_data, headers=headers).json()
+    return response['access_token']
+
+
 def get_documents_existence_map(db, collection_ref, active_posts):
     document_refs = [collection_ref.document(post.name()) for post in active_posts]
     documents = db.get_all(document_refs)
@@ -91,10 +100,14 @@ def save_json_to_storage(new_active_posts, utc_now, today):
 
 
 def main(*_):
-    print(f"Starting Task #{TASK_INDEX}, Attempt #{TASK_ATTEMPT}...")
+    print(f'Starting Task #{TASK_INDEX}, Attempt #{TASK_ATTEMPT}...')
 
-    response = requests.get(REQUEST_URL, headers={"User-agent": USER_AGENT})
+    access_token = fetch_access_token()
+    headers = {'Authorization': f'Bearer {access_token}', 'User-agent': USER_AGENT}
+    response = requests.get(REQUEST_URL, headers=headers)
+
     if not response.status_code == 200:
+        print(f'Reddit request failed with status code {response.status_code} and body: {response.text}')
         exit(response.status_code)
 
     posts = [Post(child['data']) for child in response.json()['data']['children']]
@@ -119,4 +132,4 @@ def main(*_):
     save_posts_to_firestore(db, collection_ref, new_active_upvoted_posts, today)
     save_json_to_storage(new_active_upvoted_posts, utc_now, today)
 
-    print(f"Completed Task #{TASK_INDEX}.")
+    print(f'Completed Task #{TASK_INDEX}.')
