@@ -103,4 +103,9 @@ function main() {
   displayPosts(selectedDate).then();
 }
 
+onpageshow = () => {
+  const dateInput = document.getElementById('date-input');
+  dateInput.value = getSelectedDate(getCurrentDate());
+};
+
 main();
