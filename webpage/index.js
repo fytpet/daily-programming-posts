@@ -1,5 +1,21 @@
 const MIN_DATE = '2023-10-08';
 const ELEVEN_HOURS = 11 * 60 * 60 * 1000;
+const HTML_ENTITIES_MAP = {
+  '&amp;': '&',
+  '&lt;': '<',
+  '&gt;': '>',
+  '&quot;': '"',
+  '&#x27;': "'",
+  '&#x60;': '`',
+};
+
+function unescape(str) {
+  let result = str;
+  for (const entity in HTML_ENTITIES_MAP) {
+    result = result.replace(new RegExp(entity, 'g'), HTML_ENTITIES_MAP[entity]);
+  }
+  return result;
+}
 
 function getCurrentDate() {
   const currentDate = new Date(Date.now() - ELEVEN_HOURS);
@@ -53,7 +69,7 @@ function displayPost(postList, post) {
   const postContainer = document.createElement('div');
   postContainer.className = 'post-container';
   postContainer.role = 'listitem';
-  postContainer.appendChild(createLinkElement(post['url'], post['title']));
+  postContainer.appendChild(createLinkElement(post['url'], unescape(post['title'])));
   postContainer.appendChild(createLinkElement(post['permalink'], ` [${post['num_comments']} comments]`));
   postList.appendChild(postContainer);
 }
