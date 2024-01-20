@@ -1,5 +1,5 @@
 const MIN_DATE = '2023-10-08';
-const ELEVEN_HOURS = 11 * 60 * 60 * 1000;
+const ELEVEN_HOURS = 11 * 60 * 60 * 1000; // data is available each day at 11am UTC
 const HTML_ENTITIES_MAP = {
   '&amp;': '&',
   '&lt;': '<',
@@ -74,17 +74,10 @@ function displayPost(postList, post) {
   postList.appendChild(postContainer);
 }
 
-async function displayPosts(selectedDate) {
-  try {
-    const posts = await fetchPosts(selectedDate);
-    const postList = document.getElementById('post-list')
-    for (const post of posts) {
-      displayPost(postList, post);
-    }
-    displaySelectedDateInTitle(selectedDate);
-  } catch (error) {
-    displayErrorMessage();
-  }
+function displayPosts(posts, selectedDate) {
+  const postList = document.getElementById('post-list')
+  posts.forEach((post) => displayPost(postList, post));
+  displaySelectedDateInTitle(selectedDate);
 }
 
 function initializeDateInput(currentDate, selectedDate) {
@@ -96,11 +89,21 @@ function initializeDateInput(currentDate, selectedDate) {
 }
 
 function main() {
-  const currentDate = getCurrentDate();
-  const selectedDate = getSelectedDate(currentDate);
+  try {
+    const currentDate = getCurrentDate();
+    const selectedDate = getSelectedDate(currentDate);
 
-  initializeDateInput(currentDate, selectedDate);
-  displayPosts(selectedDate).then();
+    initializeDateInput(currentDate, selectedDate);
+    fetchPosts(selectedDate)
+      .then((posts) => displayPosts(posts, selectedDate))
+      .catch((error) => {
+        console.error(error);
+        displayErrorMessage();
+      });
+  } catch (error) {
+    console.error(error);
+    displayErrorMessage();
+  }
 }
 
 onpageshow = () => {
