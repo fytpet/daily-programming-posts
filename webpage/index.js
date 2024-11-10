@@ -17,37 +17,37 @@ function unescape(str) {
   return result;
 }
 
-function getCurrentDate() {
-  const currentDate = new Date(Date.now() - ELEVEN_HOURS);
-  const year = currentDate.getUTCFullYear();
-  const month = String(currentDate.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(currentDate.getUTCDate()).padStart(2, '0');
+function getLatestDate() {
+  const latestDate = new Date(Date.now() - ELEVEN_HOURS);
+  const year = latestDate.getUTCFullYear();
+  const month = String(latestDate.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(latestDate.getUTCDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
 
-function getSelectedDate(currentDate) {
-  const urlSearchParams = new URLSearchParams(window.location.search);
-  return urlSearchParams.get('date') || currentDate;
+function getSelectedDate(latestDate) {
+  const urlDate = new URLSearchParams(window.location.search).get('date');
+  return urlDate || latestDate;
 }
 
 function dateToString(date) {
   return date.toISOString().split('T')[0];
 }
 
-function onSelectedDateChanged(e, currentDate) {
-  if (currentDate === e.target.value) {
+function onSelectedDateChanged(selectedDate, latestDate) {
+  if (latestDate === selectedDate) {
     window.location.href = window.location.pathname;
   } else {
-    window.location.href = `${window.location.pathname}?date=${e.target.value}`;
+    window.location.href = `${window.location.pathname}?date=${selectedDate}`;
   }
 }
 
-function createLinkElement(href, textContent) {
-  const link = document.createElement('a');
-  link.href = href;
-  link.textContent = textContent;
-  link.target = '_blank';
-  return link;
+function createAnchorElement(href, textContent) {
+  const anchor = document.createElement('a');
+  anchor.href = href;
+  anchor.textContent = textContent;
+  anchor.target = '_blank';
+  return anchor;
 }
 
 function displayErrorMessage() {
@@ -73,8 +73,8 @@ function displayPost(postList, post) {
   const postContainer = document.createElement('div');
   postContainer.className = 'post-container';
   postContainer.role = 'listitem';
-  postContainer.appendChild(createLinkElement(post['url'], unescape(post['title'])));
-  postContainer.appendChild(createLinkElement(post['permalink'], ` [${post['num_comments']} comments]`));
+  postContainer.appendChild(createAnchorElement(post['url'], unescape(post['title'])));
+  postContainer.appendChild(createAnchorElement(post['permalink'], ` [${post['num_comments']} comments]`));
   postList.appendChild(postContainer);
 }
 
@@ -89,15 +89,16 @@ function initializeDateInput(currentDate, selectedDate) {
   dateInput.max = currentDate;
   dateInput.min = MIN_DATE;
   dateInput.value = selectedDate;
-  dateInput.addEventListener('change', (e) => onSelectedDateChanged(e, currentDate));
+  dateInput.addEventListener('change', (e) => onSelectedDateChanged(e.target.value, currentDate));
 }
 
 function main() {
   try {
-    const currentDate = getCurrentDate();
-    const selectedDate = getSelectedDate(currentDate);
+    const latestDate = getLatestDate();
+    const selectedDate = getSelectedDate(latestDate);
 
-    initializeDateInput(currentDate, selectedDate);
+    initializeDateInput(latestDate, selectedDate);
+
     fetchPosts(selectedDate)
       .then((posts) => displayPosts(posts, selectedDate))
       .catch((error) => {
@@ -114,22 +115,23 @@ onpageshow = () => {
   const dateInput = document.getElementById('date-input');
   const previousDateAnchor = document.getElementById('previous-date');
   const nextDateAnchor = document.getElementById('next-date');
-  const currentDate = getCurrentDate();
+  const latestDate = getLatestDate();
+  const selectedDate = getSelectedDate(latestDate);
 
-  dateInput.value = getSelectedDate(currentDate);
+  dateInput.value = selectedDate;
 
-  if (dateInput.value <= MIN_DATE) {
+  if (selectedDate <= MIN_DATE) {
     previousDateAnchor.classList.add('date-link__disabled');
   } else {
-    const previousDate = new Date(dateInput.value);
+    const previousDate = new Date(selectedDate);
     previousDate.setDate(previousDate.getDate() - 1);
     previousDateAnchor.href = `${window.location.pathname}?date=${dateToString(previousDate)}`;
   }
 
-  if (dateInput.value >= currentDate) {
+  if (selectedDate >= latestDate) {
     nextDateAnchor.classList.add('date-link__disabled');
   } else {
-    const nextDate = new Date(dateInput.value);
+    const nextDate = new Date(selectedDate);
     nextDate.setDate(nextDate.getDate() + 1);
     nextDateAnchor.href = `${window.location.pathname}?date=${dateToString(nextDate)}`;
   }
