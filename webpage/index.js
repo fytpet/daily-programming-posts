@@ -30,6 +30,10 @@ function getSelectedDate(currentDate) {
   return urlSearchParams.get('date') || currentDate;
 }
 
+function dateToString(date) {
+  return date.toISOString().split('T')[0];
+}
+
 function onSelectedDateChanged(e, currentDate) {
   if (currentDate === e.target.value) {
     window.location.href = window.location.pathname;
@@ -108,7 +112,27 @@ function main() {
 
 onpageshow = () => {
   const dateInput = document.getElementById('date-input');
-  dateInput.value = getSelectedDate(getCurrentDate());
+  const previousDateAnchor = document.getElementById('previous-date');
+  const nextDateAnchor = document.getElementById('next-date');
+  const currentDate = getCurrentDate();
+
+  dateInput.value = getSelectedDate(currentDate);
+
+  if (dateInput.value <= MIN_DATE) {
+    previousDateAnchor.classList.add('date-link__disabled');
+  } else {
+    const previousDate = new Date(dateInput.value);
+    previousDate.setDate(previousDate.getDate() - 1);
+    previousDateAnchor.href = `${window.location.pathname}?date=${dateToString(previousDate)}`;
+  }
+
+  if (dateInput.value >= currentDate) {
+    nextDateAnchor.classList.add('date-link__disabled');
+  } else {
+    const nextDate = new Date(dateInput.value);
+    nextDate.setDate(nextDate.getDate() + 1);
+    nextDateAnchor.href = `${window.location.pathname}?date=${dateToString(nextDate)}`;
+  }
 };
 
 main();
