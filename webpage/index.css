@@ -26,6 +26,10 @@ a {
   margin-bottom: 30px;
 }
 
+#post-list {
+  max-width: 80ch;
+}
+
 .post-container {
   display: flex;
   flex-direction: column;
