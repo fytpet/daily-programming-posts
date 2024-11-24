@@ -67,12 +67,6 @@ async function fetchPosts(selectedDate) {
   return data.data;
 }
 
-function displaySelectedDateInTitle(selectedDate) {
-  const title = document.getElementById('title');
-  const selectedDateNonBreaking = selectedDate.replaceAll('-', '‑');
-  title.textContent = `${title.textContent} - ${selectedDateNonBreaking}`;
-}
-
 function displayPost(postList, post) {
   const postContainer = document.createElement('div');
   postContainer.className = 'post-container';
@@ -85,7 +79,6 @@ function displayPost(postList, post) {
 function displayPosts(posts, selectedDate) {
   const postList = document.getElementById('post-list')
   posts.forEach((post) => displayPost(postList, post));
-  displaySelectedDateInTitle(selectedDate);
 }
 
 function initializeDateInput(currentDate, selectedDate) {
