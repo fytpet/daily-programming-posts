@@ -34,12 +34,16 @@ function dateToString(date) {
   return date.toISOString().split('T')[0];
 }
 
-function onSelectedDateChanged(selectedDate, latestDate) {
+function buildUrl(selectedDate, latestDate) {
   if (latestDate === selectedDate) {
-    window.location.href = window.location.pathname;
+    return window.location.pathname;
   } else {
-    window.location.href = `${window.location.pathname}?date=${selectedDate}`;
+    return `${window.location.pathname}?date=${selectedDate}`;
   }
+}
+
+function onSelectedDateChanged(selectedDate, latestDate) {
+  window.location.href = buildUrl(selectedDate, latestDate);
 }
 
 function createAnchorElement(href, textContent) {
@@ -125,7 +129,7 @@ onpageshow = () => {
   } else {
     const previousDate = new Date(selectedDate);
     previousDate.setDate(previousDate.getDate() - 1);
-    previousDateAnchor.href = `${window.location.pathname}?date=${dateToString(previousDate)}`;
+    previousDateAnchor.href = buildUrl(dateToString(previousDate), latestDate);
   }
 
   if (selectedDate >= latestDate) {
@@ -133,7 +137,7 @@ onpageshow = () => {
   } else {
     const nextDate = new Date(selectedDate);
     nextDate.setDate(nextDate.getDate() + 1);
-    nextDateAnchor.href = `${window.location.pathname}?date=${dateToString(nextDate)}`;
+    nextDateAnchor.href = buildUrl(dateToString(nextDate), latestDate);
   }
 };
 
