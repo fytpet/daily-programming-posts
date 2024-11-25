@@ -76,7 +76,7 @@ function displayPost(postList, post) {
   postList.appendChild(postContainer);
 }
 
-function displayPosts(posts, selectedDate) {
+function displayPosts(posts) {
   const postList = document.getElementById('post-list')
   posts.forEach((post) => displayPost(postList, post));
 }
@@ -97,7 +97,7 @@ function main() {
     initializeDateInput(latestDate, selectedDate);
 
     fetchPosts(selectedDate)
-      .then((posts) => displayPosts(posts, selectedDate))
+      .then((posts) => displayPosts(posts))
       .catch((error) => {
         console.error(error);
         displayErrorMessage();

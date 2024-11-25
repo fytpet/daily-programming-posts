@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="dark light">
+  <meta name="description" content="Daily Programming posts from Reddit's programming subreddit">
   <title>Daily Programming</title>
   <link rel="icon" type="image/png" href="/assets/favicon-96x96.png" sizes="96x96" />
   <link rel="icon" href="/assets/favicon.ico" sizes="any" />
@@ -16,12 +17,12 @@
 </head>
 <body>
   <h1>Daily Programming</h1>
-  <div class="date-input-container">
-    <a class="date-link" id="previous-date">⬅️</a>
-    <input type="date" id="date-input" />
-    <a class="date-link" id="next-date">➡️</a>
+  <div class="date-input-container" role="region" aria-label="Date Navigation">
+    <a class="date-link" id="previous-date" aria-label="Previous Date">⬅️</a>
+    <input type="date" id="date-input" aria-label="Select Date" />
+    <a class="date-link" id="next-date" aria-label="Next Date">➡️</a>
   </div>
-  <div id="post-list" role="list"></div>
+  <div id="post-list" role="list" aria-label="Post List"></div>
   <script src="index.js"></script>
 </body>
 </html>
